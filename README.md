@@ -1,0 +1,1 @@
+# MakerForNature's Ignite-CLI Template Library
