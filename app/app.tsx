@@ -16,7 +16,7 @@ import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-c
 import { initFonts } from "./theme/fonts" // expo
 import * as storage from "./utils/storage"
 import 'react-native-gesture-handler';
-import { AppNavigator, useNavigationPersistence } from "./navigators"
+import { AppNavigator, useNavigationPersistence, BottomAppNavigator, AppDrawerNavigator, AppTabDrawerNavigator } from "./navigators"
 import { RootStore, RootStoreProvider, setupRootStore } from "./models"
 import { ToggleStorybook } from "../storybook/toggle-storybook"
 import { ErrorBoundary } from "./screens/error/error-boundary"
@@ -60,7 +60,7 @@ function App() {
       <RootStoreProvider value={rootStore}>
         <SafeAreaProvider initialMetrics={initialWindowMetrics}>
           <ErrorBoundary catchErrors={"always"}>
-            <AppNavigator
+            <AppTabDrawerNavigator
               initialState={initialNavigationState}
               onStateChange={onNavigationStateChange}
             />

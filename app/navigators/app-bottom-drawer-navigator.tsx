@@ -8,6 +8,8 @@ import React from "react"
 import { useColorScheme } from "react-native"
 import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native"
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { WelcomeScreen, DemoScreen, DemoListScreen } from "../screens"
 import { navigationRef, useBackButtonHandler } from "./navigation-utilities"
 
@@ -23,17 +25,45 @@ import { navigationRef, useBackButtonHandler } from "./navigation-utilities"
  *   https://reactnavigation.org/docs/params/
  *   https://reactnavigation.org/docs/typescript#type-checking-the-navigator
  */
-export type DrawerNavigatorParamList = {
+export type TabDrawerNavigatorParamList = {
+  tab: undefined
   welcome: undefined
   demo: undefined
   demoList: undefined
   // 🔥 Your screens go here
 }
 
-// Documentation: https://reactnavigation.org/docs/stack-navigator/
-const Drawer = createDrawerNavigator<DrawerNavigatorParamList>()
+const Tab = createBottomTabNavigator<TabDrawerNavigatorParamList>()
 
-const DrawerStack = () => {
+export function ParentTabScreen() {
+
+  return (
+    <Tab.Navigator screenOptions={{
+      headerShown: false,
+    }}>
+      <Tab.Screen name="welcome" component={DrawerTabStack} 
+       options={{
+        tabBarLabel: 'Home',
+        tabBarIcon: ({ color, size }) => (
+          <MaterialCommunityIcons name="home" color={color} size={size} />
+        ),
+      }}
+      />
+      <Tab.Screen name="demo" component={DrawerTabStackDemo} 
+      options={{
+        tabBarLabel: 'Demo',
+        tabBarIcon: ({ color, size }) => (
+          <MaterialCommunityIcons name="lightbulb-on-outline" color={color} size={size} />
+        ),
+      }}/>
+    </Tab.Navigator>
+  );
+}
+
+// Documentation: https://reactnavigation.org/docs/stack-navigator/
+const Drawer = createDrawerNavigator<TabDrawerNavigatorParamList>()
+
+const DrawerTabStack = () => {
   return (
     <Drawer.Navigator
       screenOptions={{
@@ -50,9 +80,26 @@ const DrawerStack = () => {
   )
 }
 
+const DrawerTabStackDemo = () => {
+  return (
+    <Drawer.Navigator
+      screenOptions={{
+        headerShown: true,
+        headerStyle: {backgroundColor: "whitesmoke"}
+      }}
+      initialRouteName="demo"
+    >
+      <Drawer.Screen name="welcome" component={WelcomeScreen} />
+      <Drawer.Screen name="demo" component={DemoScreen} />
+      <Drawer.Screen name="demoList" component={DemoListScreen} />
+      {/** 🔥 Your screens go here */}
+    </Drawer.Navigator>
+  )
+}
+
 interface NavigationProps extends Partial<React.ComponentProps<typeof NavigationContainer>> {}
 
-export const AppDrawerNavigator = (props: NavigationProps) => {
+export const AppTabDrawerNavigator = (props: NavigationProps) => {
   const colorScheme = useColorScheme()
   return (
     <NavigationContainer
@@ -60,9 +107,9 @@ export const AppDrawerNavigator = (props: NavigationProps) => {
       theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
       {...props}
     >
-      <DrawerStack />
+      <ParentTabScreen />
     </NavigationContainer>
   )
 }
 
-AppDrawerNavigator.displayName = "DrawerNavigator"
+AppTabDrawerNavigator.displayName = "TabDrawerNavigator"
