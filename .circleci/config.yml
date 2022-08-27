@@ -1,0 +1,42 @@
+version: 2.1
+orbs:
+  node: circleci/node@5.0.2
+jobs:
+
+  run_tests:
+    docker:
+      - image: cimg/node:16.6 # the primary container, where your job's commands are run
+
+    steps:
+      - checkout # check out the code in the project directory
+      - node/install-packages
+      - run: npm run test       
+
+  build-dev-apk:
+    docker:
+      - image: cimg/android:2022.06 # the primary container, where your job's commands are run
+    steps:
+      - checkout # check out the code in the project directory
+      - node/install:
+          install-yarn: true
+          node-version: '16.13'
+      - run: node --version
+      - run: npm install
+      - run: npm install --prefix=$HOME/.local -g react-native-cli
+      - run: react-native bundle --dev false --platform android --entry-file index.js --bundle-output ./android/app/src/main/assets/index.android.bundle --assets-dest ./android/app/src/main/res
+      - run: cd ./android && chmod +x gradlew && ./gradlew assembleDebug
+      - store_artifacts:
+          path: ./android/app/build/outputs/apk/debug/app-debug.apk
+
+workflows:
+  Build Workout App:
+    jobs:
+      - run_tests
+      - build-dev-apk:
+          requires:
+            - run_tests
+          filters:
+            branches:
+              only:
+                - develop
+                - main
