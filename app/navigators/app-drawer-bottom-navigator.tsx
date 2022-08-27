@@ -7,10 +7,11 @@
 import React from "react"
 import { useColorScheme } from "react-native"
 import { NavigationContainer, DefaultTheme, DarkTheme } from "@react-navigation/native"
-import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { WelcomeScreen, DemoScreen, DemoListScreen } from "../screens"
 import { navigationRef, useBackButtonHandler } from "./navigation-utilities"
-import { AppDrawerNavigator } from "./app-drawer-navigator"
 
 /**
  * This type allows TypeScript to know what routes are defined in this navigator
@@ -24,59 +25,75 @@ import { AppDrawerNavigator } from "./app-drawer-navigator"
  *   https://reactnavigation.org/docs/params/
  *   https://reactnavigation.org/docs/typescript#type-checking-the-navigator
  */
-export type NavigatorParamList = {
+export type DrawerTabNavigatorParamList = {
+  tab: undefined
   welcome: undefined
   demo: undefined
   demoList: undefined
   // 🔥 Your screens go here
 }
 
-// Documentation: https://reactnavigation.org/docs/stack-navigator/
-const Stack = createNativeStackNavigator<NavigatorParamList>()
+const Tab = createBottomTabNavigator<DrawerTabNavigatorParamList>()
 
-const AppStack = () => {
+export function TabScreen() {
+
   return (
-    <Stack.Navigator
+    <Tab.Navigator screenOptions={{
+      headerShown: false,
+    }}>
+      <Tab.Screen name="welcome" component={WelcomeScreen} 
+       options={{
+        tabBarLabel: 'Home',
+        tabBarIcon: ({ color, size }) => (
+          <MaterialCommunityIcons name="home" color={color} size={size} />
+        ),
+      }}
+      />
+      <Tab.Screen name="demo" component={DemoScreen} 
+      options={{
+        tabBarLabel: 'Demo',
+        tabBarIcon: ({ color, size }) => (
+          <MaterialCommunityIcons name="lightbulb-on-outline" color={color} size={size} />
+        ),
+      }}/>
+    </Tab.Navigator>
+  );
+}
+
+// Documentation: https://reactnavigation.org/docs/stack-navigator/
+const Drawer = createDrawerNavigator<DrawerTabNavigatorParamList>()
+
+const DrawerTabStack = () => {
+  return (
+    <Drawer.Navigator
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        headerStyle: {backgroundColor: "whitesmoke"}
       }}
       initialRouteName="welcome"
     >
-      <Stack.Screen name="welcome" component={WelcomeScreen} />
-      <Stack.Screen name="demo" component={DemoScreen} />
-      <Stack.Screen name="demoList" component={DemoListScreen} />
+      <Drawer.Screen name="tab" component={TabScreen} />
+      <Drawer.Screen name="welcome" component={WelcomeScreen} />
+      <Drawer.Screen name="demo" component={DemoScreen} />
+      <Drawer.Screen name="demoList" component={DemoListScreen} />
       {/** 🔥 Your screens go here */}
-    </Stack.Navigator>
+    </Drawer.Navigator>
   )
 }
 
 interface NavigationProps extends Partial<React.ComponentProps<typeof NavigationContainer>> {}
 
-export const AppNavigator = (props: NavigationProps) => {
+export const AppDrawerTabNavigator = (props: NavigationProps) => {
   const colorScheme = useColorScheme()
-  useBackButtonHandler(canExit)
   return (
     <NavigationContainer
       ref={navigationRef}
       theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
       {...props}
     >
-      <AppStack />
-      <AppDrawerNavigator independent={true}/>
+      <DrawerTabStack />
     </NavigationContainer>
   )
 }
 
-AppNavigator.displayName = "AppNavigator"
-
-/**
- * A list of routes from which we're allowed to leave the app when
- * the user presses the back button on Android.
- *
- * Anything not on this list will be a standard `back` action in
- * react-navigation.
- *
- * `canExit` is used in ./app/app.tsx in the `useBackButtonHandler` hook.
- */
-const exitRoutes = ["welcome"]
-export const canExit = (routeName: string) => exitRoutes.includes(routeName)
+AppDrawerTabNavigator.displayName = "DrawerTabNavigator"
